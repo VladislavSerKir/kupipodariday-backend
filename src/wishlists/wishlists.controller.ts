@@ -5,30 +5,30 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
 @Controller('wishlists')
 export class WishlistsController {
-  constructor(private readonly wishlistsService: WishlistsService) {}
-
-  @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistsService.create(createWishlistDto);
-  }
+  constructor(private readonly wishlistsService: WishlistsService) { }
 
   @Get()
-  findAll() {
-    return this.wishlistsService.findAll();
+  getWishlistsInfo() {
+    return this.wishlistsService.getWishlists();
+  }
+
+  @Post()
+  createProfileWishlist(@Body() body: CreateWishlistDto) {
+    return this.wishlistsService.createWishlist(body);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistsService.findOne(+id);
+  getWishlistInfoById(@Param('id') id: number) {
+    return this.wishlistsService.getWishlistById(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistsService.update(+id, updateWishlistDto);
+  updateWishlistById(@Param('id') id: number, @Body() body: UpdateWishlistDto) {
+    return this.wishlistsService.updateWishlist(id, body)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistsService.remove(+id);
+  deleteWishlistById(@Param('id') id: number) {
+    return this.wishlistsService.deleteWishlist(id)
   }
 }

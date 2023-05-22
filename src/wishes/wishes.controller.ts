@@ -5,30 +5,40 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Controller('wishes')
 export class WishesController {
-  constructor(private readonly wishesService: WishesService) {}
+  constructor(private readonly wishesService: WishesService) { }
 
   @Post()
-  create(@Body() createWishDto: CreateWishDto) {
-    return this.wishesService.create(createWishDto);
+  postWish(@Body() body: CreateWishDto) {
+    return this.wishesService.createWish(body);
   }
 
-  @Get()
-  findAll() {
-    return this.wishesService.findAll();
+  @Get('/last')
+  getLastWishInfo() {
+    return this.wishesService.getLastWish();
+  }
+
+  @Get('/top')
+  getTopWishInfo() {
+    return this.wishesService.getTopWish();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishesService.findOne(+id);
+  getWishByIdInfo(@Param('id') id: number) {
+    return this.wishesService.getWishById(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishDto: UpdateWishDto) {
-    return this.wishesService.update(+id, updateWishDto);
+  updateWishById(@Param('id') id: number, body: UpdateWishDto) {
+    return this.wishesService.updateWish(id, body)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishesService.remove(+id);
+  deleteWishById(@Param('id') id: number) {
+    return this.wishesService.deleteWish(id);
+  }
+
+  @Post(':id/copy')
+  copyWishById(@Param('id') id: number) {
+    return this.wishesService.copyWish(id);
   }
 }
