@@ -1,40 +1,50 @@
-import { Wish } from "src/wishes/entities/wish.entity";
-import { Wishlist } from "src/wishlists/entities/wishlist.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { IsNotEmpty, Length } from 'class-validator';
+import { Wish } from 'src/wishes/entities/wish.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @Column()
-    username: string;
+  @Column({ unique: true })
+  @IsNotEmpty()
+  @Length(2, 30)
+  username: string;
 
-    @Column()
-    about: string;
+  @Column({ default: 'Пока ничего не рассказал о себе' })
+  @Length(2, 200)
+  about: string;
 
-    @Column()
+  @Column({ default: 'https://i.pravatar.cc/300' })
+  avatar: string;
 
-    avatar: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column()
-    email: string;
+  @Column()
+  password: string;
 
-    @Column()
-    password: string;
+  @OneToMany(() => Wish, (wishes) => wishes.owner)
+  wishes: Wish[];
 
-    @OneToMany(() => Wish, (wish) => wish.name)
-    wishes: Wish[];
+  @OneToMany(() => Wish, (wish) => wish.name)
+  offers: Wish[];
 
-    @OneToMany(() => Wish, (offer) => offer.name)
-    offers: Wish[];
-
-    @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
-    wishlists: Wishlist[];
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
+  wishlists: Wishlist[];
 }

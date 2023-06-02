@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { Repository } from 'typeorm';
@@ -7,8 +7,25 @@ import { Repository } from 'typeorm';
 export class WishesService {
   constructor(@InjectRepository(Wish) private wishRepo: Repository<Wish>) { }
 
-  async createWish(body: Partial<Wish>) {
-    return `/wishes   ${body}`
+  async createWish(body: Partial<Wish>, userInfo) {
+    const { name, link, image, description, price } = body;
+    const newWish = await this.wishRepo.create({
+      owner: userInfo.id,
+      name,
+      link,
+      image,
+      description,
+      price,
+      copied: 0,
+      raised: 0,
+    })
+
+    await this.wishRepo.save(newWish)
+      .then((newWish) => newWish)
+      .catch((e) => {
+        throw new InternalServerErrorException(`Ошибка сервера ${e}`)
+      })
+    return newWish;
   }
 
   async getLastWish() {
@@ -20,7 +37,16 @@ export class WishesService {
   }
 
   async getWishById(id: number) {
-    return `/wishes/${id}  GET`;
+    const wish = await this.wishRepo.findOne({
+      where: { id },
+      relations: ['owner']
+    });
+    console.log(wish)
+    if (!wish) {
+      throw new NotFoundException(`Подарка с id: ${id} не существует`);
+    } else {
+      return wish;
+    }
   }
 
   async updateWish(id: number, body: Partial<Wish>) {
@@ -28,7 +54,10 @@ export class WishesService {
   }
 
   async deleteWish(id: number) {
-    return `/wishes/${id}  DELETE`;
+    return await this.wishRepo.delete({ id })
+      .catch(() => {
+        throw new NotFoundException(`Ошибка сервера`);
+      })
   }
 
   async copyWish(id: number) {

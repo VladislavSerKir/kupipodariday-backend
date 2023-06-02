@@ -1,33 +1,39 @@
-import { User } from "src/users/entities/user.entity";
-import { Wish } from "src/wishes/entities/wish.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from "typeorm";
+import { IsBoolean, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { User } from 'src/users/entities/user.entity';
+import { Wish } from 'src/wishes/entities/wish.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Offer {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    // @Column()
-    // user: string;
+  @OneToOne(() => User, (user) => user.id)
+  user: User;
 
-    @OneToOne(() => User, (user) => user.id)
-    user: User;
+  @OneToOne(() => Wish, (wish) => wish.link)
+  item: Wish;
 
-    // @Column()
-    // item: string;
+  @Column()
+  @IsPositive()
+  @IsNotEmpty()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  amount: number;
 
-    @OneToOne(() => Wish, (wish) => wish.link)
-    item: Wish;
-
-    @Column()
-    amount: number;
-
-    @Column()
-    hidden: boolean;
+  @Column({ default: false })
+  @IsBoolean()
+  hidden: boolean;
 }

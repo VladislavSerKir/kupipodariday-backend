@@ -1,15 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { JwtGuard } from 'src/auth/JwtGuard';
 
 @Controller('wishes')
 export class WishesController {
   constructor(private readonly wishesService: WishesService) { }
 
+  @UseGuards(JwtGuard)
   @Post()
-  postWish(@Body() body: CreateWishDto) {
-    return this.wishesService.createWish(body);
+  postWish(@Req() req, @Body() body: CreateWishDto) {
+    console.log(body, req.user)
+    return this.wishesService.createWish(body, req.user);
   }
 
   @Get('/last')
@@ -29,9 +42,10 @@ export class WishesController {
 
   @Patch(':id')
   updateWishById(@Param('id') id: number, body: UpdateWishDto) {
-    return this.wishesService.updateWish(id, body)
+    return this.wishesService.updateWish(id, body);
   }
 
+  @UseGuards(JwtGuard)
   @Delete(':id')
   deleteWishById(@Param('id') id: number) {
     return this.wishesService.deleteWish(id);

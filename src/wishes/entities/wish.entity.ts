@@ -1,38 +1,69 @@
-import { Offer } from "src/offers/entities/offer.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsUrl,
+  Length,
+  Min,
+} from 'class-validator';
+import { Offer } from 'src/offers/entities/offer.entity';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+} from 'typeorm';
 
 @Entity()
 export class Wish {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @Column()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @Column()
-    name: string;
+  @Column()
+  @IsNotEmpty()
+  @Length(2, 250)
+  name: string;
 
-    @Column()
-    link: string;
+  @Column()
+  link: string;
 
-    @Column()
-    image: string;
+  @Column()
+  @IsUrl()
+  image: string;
 
-    @Column()
-    price: number;
+  @Column()
+  @Min(1)
+  @IsPositive()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  price: number;
 
-    @Column()
-    raised: number;
+  @Column()
+  @Min(1)
+  @IsPositive()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  raised: number;
 
-    @Column()
-    owner: string;
+  @ManyToOne(() => User, (user) => user.id)
+  owner: User;
 
-    @Column()
-    description: string;
+  @Column()
+  @Length(1, 1024)
+  description: string;
 
-    @OneToMany(() => Offer, (offer) => offer.user)
-    offers: Offer[];
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[];
+
+  @Column()
+  @IsPositive()
+  copied: number;
 }

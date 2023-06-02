@@ -8,7 +8,7 @@ export class OffersController {
 
   @Post()
   createProfileOffer(@Body() body: CreateOfferDto) {
-    return this.offersService.createOffer(body)
+    return this.offersService.createOffer(body);
   }
 
   @Get()
@@ -16,8 +16,8 @@ export class OffersController {
     return this.offersService.getOffers();
   }
 
-  @Get(':id')
+  @Get('/:id')
   getOffersByIdInfo(@Param('id') id: string) {
-    return this.offersService.getOffersById(id)
+    return this.offersService.getOffersById(parseInt(id));
   }
 }
