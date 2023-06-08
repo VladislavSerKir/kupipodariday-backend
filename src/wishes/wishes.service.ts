@@ -3,8 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-// import { CreateWishDto } from './dto/create-wish.dto';
-// import { CreateOfferDto } from 'src/offers/dto/create-offer.dto';
 
 @Injectable()
 export class WishesService {
@@ -32,25 +30,65 @@ export class WishesService {
   }
 
   async getLastWish() {
-    return this.wishRepo.find({
-      where: {},
-      order: { createdAt: 'DESC' },
-      take: 40,
-    });
+    try {
+      return await this.wishRepo.find({
+        where: {},
+        relations: {
+          owner: {
+            offers: true,
+            wishes: true,
+            wishlists: true
+          },
+          offers: {
+            user: true,
+            item: true
+          }
+        },
+        order: { createdAt: 'DESC' },
+        take: 40,
+      });
+    } catch (e) {
+      throw new NotFoundException(e)
+    }
   }
 
   async getTopWish() {
-    return this.wishRepo.find({
-      where: {},
-      order: { copied: 'ASC' },
-      take: 40,
-    });
+    try {
+      return await this.wishRepo.find({
+        where: {},
+        relations: {
+          owner: {
+            offers: true,
+            wishes: true,
+            wishlists: true
+          },
+          offers: {
+            user: true,
+            item: true
+          }
+        },
+        order: { copied: 'ASC' },
+        take: 40,
+      });
+    } catch (e) {
+      throw new NotFoundException(e)
+    }
   }
 
   async getWishById(id: number) {
     const wish = await this.wishRepo.findOne({
       where: { id },
-      relations: ['owner']
+      relations: {
+        owner: {
+          offers: true,
+          wishes: true,
+          wishlists: true
+        },
+        offers: {
+          user: true,
+          item: true
+        }
+      },
     });
     if (!wish) {
       throw new NotFoundException(`Подарка с id: ${id} не существует`);
@@ -59,13 +97,14 @@ export class WishesService {
     }
   }
 
-  async updateWish(id: number, body, user: User) {
+  async updateWish(user: User, id: number, body) {
     const wish = await this.getWishById(id);
     if (wish.owner.id !== user.id) {
       throw new ForbiddenException('Редактирование запрещено');
     } else {
       try {
-        await this.wishRepo.update({ id }, { ...body });
+        await this.wishRepo.update({ id }, body);
+        console.log(await this.getWishById(id))
         return this.getWishById(id);
       } catch (e) {
         throw new BadRequestException(`Запрос не сработал`);
@@ -86,19 +125,31 @@ export class WishesService {
     }
   }
 
-  async deleteWish(id: number) {
-    return await this.wishRepo.delete({ id })
-      .catch(() => {
-        throw new NotFoundException(`Ошибка сервера`);
-      })
+  async deleteWish(id: number, user: User) {
+    const wishToDelete = await this.getWishById(id);
+    if (wishToDelete.owner.id !== user.id) {
+      throw new ForbiddenException('Разрешено удалять только свои подарки');
+    } else {
+      try {
+        return await this.wishRepo.delete({ id })
+      } catch (e) {
+        throw new NotFoundException(`Ошибка сервера: ${e}`);
+      }
+    }
   }
 
   async copyWish(id: number, user: User) {
     const wish = await this.getWishById(id);
     if (wish.owner.id === user.id) {
-      throw new BadRequestException('Разрешено копировать только чужие подарки');
+      throw new ForbiddenException('Разрешено копировать только чужие подарки');
+    } else {
+      try {
+        const newWish = await this.createWish({ ...wish, copied: wish.copied + 1 }, user);
+        return newWish;
+      } catch (e) {
+        throw new NotFoundException(`Ошибка сервера: ${e}`);
+      }
     }
-    const newWish = await this.createWish({ ...wish, copied: wish.copied + 1 }, user);
-    return newWish;
   }
+
 }

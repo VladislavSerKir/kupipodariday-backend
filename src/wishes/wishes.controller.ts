@@ -46,13 +46,13 @@ export class WishesController {
   @UseGuards(JwtGuard)
   @Patch(':id')
   updateWishById(@AuthUser() user: User, @Param('id') id: number, body: UpdateWishDto): Promise<Wish> {
-    return this.wishesService.updateWish(id, body, user);
+    return this.wishesService.updateWish(user, id, body);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  deleteWishById(@Param('id') id: number): Promise<DeleteResult> {
-    return this.wishesService.deleteWish(id);
+  deleteWishById(@AuthUser() user: User, @Param('id') id: number): Promise<DeleteResult> {
+    return this.wishesService.deleteWish(id, user);
   }
 
   @UseGuards(JwtGuard)

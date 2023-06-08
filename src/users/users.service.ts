@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { hashPassword } from 'src/helpers/hash';
 
 @Injectable()
@@ -28,22 +28,6 @@ export class UsersService {
       },
     });
 
-    // const user = await this.userRepo.find({
-    //   select: {
-    //     username: username,
-    //     about: true,
-    //     id: true,
-    //     createdAt: true,
-    //     updatedAt: true,
-    //     avatar: true,
-    //     email: true,
-    //   },
-    //   relations: {
-    //     wishes: true,
-    //     offers: true,
-    //   },
-    // });
-
     if (!user) {
       throw new NotFoundException('Ошибка загрузки профиля')
     } else {
@@ -51,7 +35,7 @@ export class UsersService {
     }
   }
 
-  async updateProfile(user: User, userData): Promise<UpdateResult> {
+  async updateProfile(user: User, userData): Promise<User> {
     const { password } = userData;
 
     if (password) {
@@ -64,14 +48,14 @@ export class UsersService {
     if (!updatedUser) {
       throw new BadRequestException('Ошибка запроса на изменение профиля');
     } else {
-      return updatedUser;
+      return this.getUserById(user.id);
     }
   }
 
-  async getProfileWishes(username: string) {
+  async getProfileWishes(id: number) {
     const user = await this.userRepo.findOne({
       where: {
-        username
+        id
       },
       relations: ['wishes']
     });
@@ -83,12 +67,10 @@ export class UsersService {
   }
 
   async getUser(username: string) {
-    // console.log(`/users/${username}`);
     const user = await this.userRepo.findOne({ where: { username } })
     if (!user) {
       throw new NotFoundException(`Пользователь ${username} не существует`);
     } else {
-      // console.log(user)
       return user;
     }
   }
@@ -96,7 +78,7 @@ export class UsersService {
   async getUserById(id: number): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
-      relations: ['wishlists', 'wishes', 'offers'],
+      // relations: ['wishlists', 'wishes', 'offers'],
     });
     if (!user) {
       throw new NotFoundException(`Пользователь с id: ${id} не существует`);
@@ -106,20 +88,22 @@ export class UsersService {
   }
 
   async getUserWishes(username: string) {
-    const user = await this.userRepo.findOneBy(
-      { username }
-    );
+    const user = await this.userRepo.findOne({
+      where: { username },
+      relations: ['wishes']
+    });
     if (!user) {
       throw new NotFoundException(`Пользователя ${username} не существует`);
     } else {
+      console.log(user.wishes)
       return user.wishes;
     }
   }
 
-  async findUser(query): Promise<User[]> {
-    const user = await this.userRepo.find({ where: { username: query.username } });
+  async findUser({ query }): Promise<User[]> {
+    const user = await this.userRepo.find({ where: { username: query } });
     if (!user) {
-      throw new NotFoundException(`Пользователя ${query.username} не существует`);
+      throw new NotFoundException(`Пользователя ${query} не существует`);
     } else {
       return user;
     }

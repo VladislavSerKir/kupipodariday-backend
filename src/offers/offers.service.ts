@@ -35,24 +35,34 @@ export class OffersService {
         throw new InternalServerErrorException('Внутренняя ошибка сервера')
       }
 
-      console.log(sponsoredWish, newOffer)
       return newOffer
     }
   }
 
   async getOffers(): Promise<Offer[]> {
-    const offers = this.offerRepo.find()
+    const offers = this.offerRepo.find({
+      relations: {
+        user: true,
+        item: true
+      }
+    })
     if (!offers) {
-      throw new NotFoundException();
+      throw new NotFoundException('Предложения скинуться не найдено');
     } else {
       return offers;
     }
   }
 
   async getOffersById(id: number): Promise<Offer> {
-    const offer = await this.offerRepo.findOne({ where: { id: id } });
+    const offer = await this.offerRepo.findOne({
+      where: { id: id },
+      relations: {
+        user: true,
+        item: true
+      }
+    });
     if (!offer) {
-      throw new NotFoundException();
+      throw new NotFoundException('Предложение скинуться не найдено');
     }
     return offer;
   }

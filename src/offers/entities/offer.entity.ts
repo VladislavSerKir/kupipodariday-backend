@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
@@ -21,7 +22,8 @@ export class Offer {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.offers)
+  @JoinColumn()
   user: User;
 
   @ManyToOne(() => Wish, (wish) => wish.id)

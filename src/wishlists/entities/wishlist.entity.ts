@@ -5,10 +5,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 
 @Entity()
@@ -34,7 +35,8 @@ export class Wishlist {
   @Column()
   image: string;
 
-  @OneToMany(() => Wish, (wish) => wish.id)
+  @ManyToMany(() => Wish, (wish) => wish.id)
+  @JoinTable()
   items: Wish[];
 
   @ManyToOne(() => User, (user) => user.wishlists)

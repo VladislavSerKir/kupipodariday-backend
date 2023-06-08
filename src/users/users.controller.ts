@@ -2,10 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/co
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserDto } from './dto/find-user.dto';
-import { AuthService } from 'src/auth/auth.service';
 import { JwtGuard } from 'src/auth/JwtGuard';
 import { User } from './entities/user.entity';
-import { UpdateResult } from 'typeorm';
 import { AuthUser } from 'src/decorators/user.decorator';
 import { Wish } from 'src/wishes/entities/wish.entity';
 
@@ -13,7 +11,6 @@ import { Wish } from 'src/wishes/entities/wish.entity';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly authService: AuthService,
   ) { }
 
   @UseGuards(JwtGuard)
@@ -24,26 +21,20 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @Patch('/me')
-  editUser(@AuthUser() user: User, @Body() userData: UpdateUserDto): Promise<UpdateResult> {
+  editUser(@AuthUser() user: User, @Body() userData: UpdateUserDto): Promise<User> {
     return this.usersService.updateProfile(user, userData);
   }
 
   @UseGuards(JwtGuard)
   @Get('/me/wishes')
   getProfileWishesInfo(@AuthUser() user: User): Promise<Wish[]> {
-    return this.usersService.getProfileWishes(user.username);
+    return this.usersService.getProfileWishes(user.id);
   }
 
-  // @UseGuards(JwtGuard)
   @Get(':username')
   getUserInfo(@Param('username') username: string): Promise<User> {
     return this.usersService.getUser(username);
   }
-
-  // @Get(':id')
-  // findById(@Param('id') id: string) {
-  //   return this.usersService.getUserById(+id)
-  // }
 
   @Get('/:username/wishes')
   getUserWishesInfo(@Param('username') username: string): Promise<Wish[]> {

@@ -1,8 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wishlist } from './entities/wishlist.entity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Wish } from 'src/wishes/entities/wish.entity';
+import { CreateWishlistDto } from './dto/create-wishlist.dto';
 
 @Injectable()
 export class WishlistsService {
@@ -11,21 +13,22 @@ export class WishlistsService {
   ) { }
 
   async getWishlists() {
-    const wishlists = await this.wishlistRepo.find({})
+    const wishlists = await this.wishlistRepo.find({
+      relations: {
+        owner: true,
+      }
+    })
     if (!wishlists) {
       throw new NotFoundException(`Вишлисты не найдены`);
+    } else {
+      return wishlists;
     }
-
-    return wishlists;
   }
 
-  async createWishlist(body, user) {
-    const { name, image, itemsId } = body
-    const wishItems = itemsId.map(item => { +item })
-    // const wishItems = await this.wishlistRepo.find({
-    //   where: { id: In(body.itemsId) },
-    // });
-    console.log(wishItems, itemsId)
+  async createWishlist(body: CreateWishlistDto, user: User) {
+    const { name, image, itemsId } = body;
+    const wishItems = itemsId.map((id: number) => ({ id } as Wish))
+
     const newWishlist = await this.wishlistRepo.create({
       owner: user,
       name,
@@ -35,8 +38,7 @@ export class WishlistsService {
 
     try {
       const savedWishlist = await this.wishlistRepo.save(newWishlist)
-      console.log(savedWishlist)
-      return savedWishlist
+      return this.getWishlistById(savedWishlist.id)
     } catch {
       throw new BadRequestException(`Запрос не сработал`)
     }
@@ -45,22 +47,17 @@ export class WishlistsService {
   async getWishlistById(id: number) {
     const wishlist = await this.wishlistRepo.findOne({
       where: { id },
-      relations: ['items', 'owner'],
-      // relations: {
-      //   items: {
-      //     offers: true,
-      //     wishes: true,
-      //   },
-      //   items: {
-
-      //   }
-      // },
+      relations: {
+        items: true,
+        owner: true
+      },
     });
+
     if (!wishlist) {
       throw new NotFoundException(`Вишлист не найден`);
+    } else {
+      return wishlist;
     }
-    console.log(wishlist)
-    return wishlist;
   }
 
   async updateWishlist(id: number, body, user: User) {
@@ -72,15 +69,16 @@ export class WishlistsService {
         await this.wishlistRepo.update({ id }, body);
         return this.getWishlistById(id);
       } catch (e) {
-        throw new BadRequestException(`Запрос не сработал`);
+        throw new BadRequestException(`Запрос не сработал: ${e}`);
       }
     }
   }
 
   async deleteWishlist(id: number) {
-    return await this.wishlistRepo.delete({ id })
-      .catch(() => {
-        throw new NotFoundException(`Ошибка сервера`);
-      })
+    try {
+      return await this.wishlistRepo.delete({ id })
+    } catch (e) {
+      throw new NotFoundException(`Ошибка сервера: ${e}`);
+    }
   }
 }
