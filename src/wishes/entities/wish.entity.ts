@@ -53,17 +53,17 @@ export class Wish {
   @IsNumber({ maxDecimalPlaces: 2 })
   raised: number;
 
-  @ManyToOne(() => User, (user) => user.id)
-  owner: User;
-
   @Column()
   @Length(1, 1024)
   description: string;
 
-  @OneToMany(() => Offer, (offer) => offer.user)
-  offers: Offer[];
-
   @Column()
   @IsPositive()
   copied: number;
+
+  @ManyToOne(() => User, (user) => user.id)
+  owner: User;
+
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[];
 }

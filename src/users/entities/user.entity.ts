@@ -1,4 +1,5 @@
 import { IsNotEmpty, Length } from 'class-validator';
+import { Offer } from 'src/offers/entities/offer.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 import {
@@ -42,9 +43,9 @@ export class User {
   @OneToMany(() => Wish, (wishes) => wishes.owner)
   wishes: Wish[];
 
-  @OneToMany(() => Wish, (wish) => wish.name)
-  offers: Wish[];
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[];
 
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
   wishlists: Wishlist[];
 }

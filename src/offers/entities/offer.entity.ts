@@ -5,9 +5,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -21,10 +21,10 @@ export class Offer {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   user: User;
 
-  @OneToOne(() => Wish, (wish) => wish.link)
+  @ManyToOne(() => Wish, (wish) => wish.id)
   item: Wish;
 
   @Column()

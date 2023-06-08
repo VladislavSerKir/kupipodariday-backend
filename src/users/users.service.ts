@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { hashPassword } from 'src/helpers/hash';
 
 @Injectable()
 export class UsersService {
@@ -10,40 +10,65 @@ export class UsersService {
     @InjectRepository(User) private userRepo: Repository<User>,
   ) { }
 
-  async getProfile(username: string) {
-    console.log('/users/me');
+  async getProfile(username: string): Promise<User> {
     const user = await this.userRepo.findOne({
-      where: { username }
+      where: { username },
+      select: {
+        username: true,
+        about: true,
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        avatar: true,
+        email: true,
+      },
+      relations: {
+        wishes: true,
+        offers: true,
+      },
     });
-    // if (!user) {
-    //   return new NotFoundException('Список желаний пуст');
-    // }
-    console.log(user);
-    return user
+
+    // const user = await this.userRepo.find({
+    //   select: {
+    //     username: username,
+    //     about: true,
+    //     id: true,
+    //     createdAt: true,
+    //     updatedAt: true,
+    //     avatar: true,
+    //     email: true,
+    //   },
+    //   relations: {
+    //     wishes: true,
+    //     offers: true,
+    //   },
+    // });
+
+    if (!user) {
+      throw new NotFoundException('Ошибка загрузки профиля')
+    } else {
+      return user
+    }
   }
 
-  async hashPassword(password: string) {
-    const salt = await bcrypt.genSalt();
-    return await bcrypt.hash(password, salt);
-  }
-
-  async updateProfile(user, userData) {
-    console.log(user, userData);
+  async updateProfile(user: User, userData): Promise<UpdateResult> {
     const { password } = userData;
 
     if (password) {
-      const hashedPassword = await this.hashPassword(password);
+      const hashedPassword = await hashPassword(password);
       userData = { ...userData, password: hashedPassword }
     }
-    console.log(user.id)
 
     const updatedUser = await this.userRepo.update(user.id, userData);
-    console.log(updatedUser)
-    return updatedUser;
+
+    if (!updatedUser) {
+      throw new BadRequestException('Ошибка запроса на изменение профиля');
+    } else {
+      return updatedUser;
+    }
   }
 
   async getProfileWishes(username: string) {
-    console.log('/users/me/wishes');
     const user = await this.userRepo.findOne({
       where: {
         username
@@ -51,26 +76,28 @@ export class UsersService {
       relations: ['wishes']
     });
     if (!user) {
-      return new NotFoundException('Список желаний пуст');
+      throw new NotFoundException('Список желаний пуст');
+    } else {
+      return user.wishes;
     }
-    console.log(user.wishes)
-    return user.wishes;
   }
 
   async getUser(username: string) {
-    console.log(`/users/${username}`);
-    const user = await this.userRepo.findOneBy({ username })
+    // console.log(`/users/${username}`);
+    const user = await this.userRepo.findOne({ where: { username } })
     if (!user) {
       throw new NotFoundException(`Пользователь ${username} не существует`);
     } else {
-      console.log(user)
+      // console.log(user)
       return user;
     }
   }
 
-  async getUserById(id: number) {
-    const user = await this.userRepo.findOne({ where: { id } });
-    console.log(user)
+  async getUserById(id: number): Promise<User> {
+    const user = await this.userRepo.findOne({
+      where: { id },
+      relations: ['wishlists', 'wishes', 'offers'],
+    });
     if (!user) {
       throw new NotFoundException(`Пользователь с id: ${id} не существует`);
     } else {
@@ -79,13 +106,18 @@ export class UsersService {
   }
 
   async getUserWishes(username: string) {
-    console.log(`/users/${username}/wishes`);
+    const user = await this.userRepo.findOneBy(
+      { username }
+    );
+    if (!user) {
+      throw new NotFoundException(`Пользователя ${username} не существует`);
+    } else {
+      return user.wishes;
+    }
   }
 
-  async findUser(query) {
-    console.log(query)
+  async findUser(query): Promise<User[]> {
     const user = await this.userRepo.find({ where: { username: query.username } });
-    console.log(user)
     if (!user) {
       throw new NotFoundException(`Пользователя ${query.username} не существует`);
     } else {

@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { JwtGuard } from 'src/auth/JwtGuard';
+import { Wish } from './entities/wish.entity';
+import { DeleteResult } from 'typeorm';
+import { AuthUser } from 'src/decorators/user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('wishes')
 export class WishesController {
@@ -20,39 +23,41 @@ export class WishesController {
 
   @UseGuards(JwtGuard)
   @Post()
-  postWish(@Req() req, @Body() body: CreateWishDto) {
-    console.log(body, req.user)
-    return this.wishesService.createWish(body, req.user);
+  postWish(@AuthUser() user: User, @Body() body: CreateWishDto): Promise<Wish> {
+    return this.wishesService.createWish(body, user);
   }
 
   @Get('/last')
-  getLastWishInfo() {
+  getLastWishInfo(): Promise<Wish[]> {
     return this.wishesService.getLastWish();
   }
 
   @Get('/top')
-  getTopWishInfo() {
+  getTopWishInfo(): Promise<Wish[]> {
     return this.wishesService.getTopWish();
   }
 
+  @UseGuards(JwtGuard)
   @Get(':id')
-  getWishByIdInfo(@Param('id') id: number) {
+  getWishByIdInfo(@Param('id') id: number): Promise<Wish> {
     return this.wishesService.getWishById(id);
   }
 
+  @UseGuards(JwtGuard)
   @Patch(':id')
-  updateWishById(@Param('id') id: number, body: UpdateWishDto) {
-    return this.wishesService.updateWish(id, body);
+  updateWishById(@AuthUser() user: User, @Param('id') id: number, body: UpdateWishDto): Promise<Wish> {
+    return this.wishesService.updateWish(id, body, user);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  deleteWishById(@Param('id') id: number) {
+  deleteWishById(@Param('id') id: number): Promise<DeleteResult> {
     return this.wishesService.deleteWish(id);
   }
 
+  @UseGuards(JwtGuard)
   @Post(':id/copy')
-  copyWishById(@Param('id') id: number) {
-    return this.wishesService.copyWish(id);
+  copyWishById(@AuthUser() user: User, @Param('id') id: number): Promise<Wish> {
+    return this.wishesService.copyWish(id, user);
   }
 }

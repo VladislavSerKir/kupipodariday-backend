@@ -14,10 +14,6 @@ import { LocalStrategy } from './LocalStrategy';
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-
-    // PassportModule.register({ defaultStrategy: 'jwt' }),
-    // JwtModule.register({ secret: 'secret', signOptions: { expiresIn: 36000 } }),
-
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
