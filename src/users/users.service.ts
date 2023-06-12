@@ -35,7 +35,7 @@ export class UsersService {
     }
   }
 
-  async updateProfile(user: User, userData): Promise<User> {
+  async updateProfile(user: User, userData: Partial<User>): Promise<User> {
     const { password } = userData;
 
     if (password) {
@@ -103,7 +103,7 @@ export class UsersService {
     }
   }
 
-  async findUser({ query }): Promise<User[]> {
+  async findUser({ query }: { query: string }): Promise<User[]> {
     const user = await this.userRepo.find({ where: { username: query } });
 
     if (!user) {

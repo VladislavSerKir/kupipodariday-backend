@@ -4,6 +4,7 @@ import { Offer } from './entities/offer.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { WishesService } from 'src/wishes/wishes.service';
+import { CreateOfferDto } from './dto/create-offer.dto';
 
 @Injectable()
 export class OffersService {
@@ -12,7 +13,7 @@ export class OffersService {
     private readonly wishesService: WishesService,
   ) { }
 
-  async createOffer(body, user: User) {
+  async createOffer(body: CreateOfferDto, user: User) {
     const { itemId, amount } = body;
     const sponsoredWish = await this.wishesService.getWishById(itemId);
 

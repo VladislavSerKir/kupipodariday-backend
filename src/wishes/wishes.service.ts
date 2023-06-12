@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Injectable()
 export class WishesService {
@@ -98,7 +99,7 @@ export class WishesService {
     }
   }
 
-  async updateWish(user: User, id: number, body) {
+  async updateWish(user: User, id: number, body: UpdateWishDto) {
     const wish = await this.getWishById(id);
 
     if (wish.owner.id !== user.id) {

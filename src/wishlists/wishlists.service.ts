@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
 @Injectable()
 export class WishlistsService {
@@ -61,7 +62,7 @@ export class WishlistsService {
     }
   }
 
-  async updateWishlist(id: number, body, user: User) {
+  async updateWishlist(id: number, body: UpdateWishlistDto, user: User) {
     const wishlist = await this.getWishlistById(id);
     if (wishlist.owner.id !== user.id) {
       throw new ForbiddenException('Редактирование чужих вишлистов запрещено');
