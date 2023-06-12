@@ -19,14 +19,14 @@ export class WishesService {
       price,
       copied: 0,
       raised: 0,
-    })
+    });
 
-    await this.wishRepo.save(newWish)
-      .then((newWish) => newWish)
-      .catch((e) => {
-        throw new InternalServerErrorException(`Ошибка сервера ${e}`)
-      })
-    return newWish;
+    try {
+      await this.wishRepo.save(newWish);
+      return newWish;
+    } catch (e) {
+      throw new InternalServerErrorException(`Ошибка сервера ${e}`)
+    }
   }
 
   async getLastWish() {
@@ -68,7 +68,7 @@ export class WishesService {
           }
         },
         order: { copied: 'ASC' },
-        take: 40,
+        take: 10,
       });
     } catch (e) {
       throw new NotFoundException(e)
@@ -90,6 +90,7 @@ export class WishesService {
         }
       },
     });
+
     if (!wish) {
       throw new NotFoundException(`Подарка с id: ${id} не существует`);
     } else {
@@ -99,12 +100,12 @@ export class WishesService {
 
   async updateWish(user: User, id: number, body) {
     const wish = await this.getWishById(id);
+
     if (wish.owner.id !== user.id) {
       throw new ForbiddenException('Редактирование запрещено');
     } else {
       try {
         await this.wishRepo.update({ id }, body);
-        console.log(await this.getWishById(id))
         return this.getWishById(id);
       } catch (e) {
         throw new BadRequestException(`Запрос не сработал`);

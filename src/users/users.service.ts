@@ -59,6 +59,7 @@ export class UsersService {
       },
       relations: ['wishes']
     });
+
     if (!user) {
       throw new NotFoundException('Список желаний пуст');
     } else {
@@ -67,7 +68,8 @@ export class UsersService {
   }
 
   async getUser(username: string) {
-    const user = await this.userRepo.findOne({ where: { username } })
+    const user = await this.userRepo.findOne({ where: { username } });
+
     if (!user) {
       throw new NotFoundException(`Пользователь ${username} не существует`);
     } else {
@@ -78,8 +80,8 @@ export class UsersService {
   async getUserById(id: number): Promise<User> {
     const user = await this.userRepo.findOne({
       where: { id },
-      // relations: ['wishlists', 'wishes', 'offers'],
     });
+
     if (!user) {
       throw new NotFoundException(`Пользователь с id: ${id} не существует`);
     } else {
@@ -92,6 +94,7 @@ export class UsersService {
       where: { username },
       relations: ['wishes']
     });
+
     if (!user) {
       throw new NotFoundException(`Пользователя ${username} не существует`);
     } else {
@@ -102,6 +105,7 @@ export class UsersService {
 
   async findUser({ query }): Promise<User[]> {
     const user = await this.userRepo.find({ where: { username: query } });
+
     if (!user) {
       throw new NotFoundException(`Пользователя ${query} не существует`);
     } else {

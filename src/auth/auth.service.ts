@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { SigninUserDto } from 'src/users/dto/signin-user.dto';
 import { compareHash, hashPassword } from 'src/helpers/hash';
+import { duplicateKeyStatusCode } from 'src/utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -27,28 +28,25 @@ export class AuthService {
             avatar,
         });
 
-        await this.userRepo.save(newUser)
-            .then((newUser) => newUser)
-            .catch((e) => {
-                if (e.code === '23505') {
-                    throw new ConflictException('Пользователь с указанным email уже существует');
-                } else {
-                    throw new InternalServerErrorException();
-                }
-            })
-
-        return newUser;
+        try {
+            await this.userRepo.save(newUser)
+            return newUser;
+        } catch (e) {
+            if (e.code === duplicateKeyStatusCode) {
+                throw new ConflictException('Пользователь с указанным email уже существует');
+            } else {
+                throw new InternalServerErrorException('Внутренняя ошибка сервера');
+            }
+        }
     }
 
     async signIn(signinUserDto: SigninUserDto): Promise<{ access_token: string }> {
-        console.log('signIn', signinUserDto)
         const { username, password } = signinUserDto;
         const user = await this.usersService.getUser(username);
 
         if (user && (await compareHash(password, user.password))) {
             const access_token: string = await this.jwtService.sign({ userId: user.id }, { secret: `${process.env.JWT_SECRET}` });
 
-            console.log(access_token)
             return { access_token };
         } else {
             throw new UnauthorizedException('Проверьте логин или пароль');

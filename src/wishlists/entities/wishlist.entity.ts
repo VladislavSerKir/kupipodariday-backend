@@ -1,4 +1,4 @@
-import { IsNotEmpty, Length, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, Length, MaxLength } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import {
@@ -15,24 +15,31 @@ import {
 @Entity()
 export class Wishlist {
   @PrimaryGeneratedColumn()
+  @IsNotEmpty()
   id: number;
 
   @CreateDateColumn()
+  @IsNotEmpty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsNotEmpty()
   updatedAt: Date;
 
   @Column()
   @IsNotEmpty()
+  @IsString()
   @Length(1, 250)
   name: string;
 
   @Column({ default: '' })
+  @IsString()
   @MaxLength(1500)
   description: string;
 
   @Column()
+  @IsNotEmpty()
+  @IsString()
   image: string;
 
   @ManyToMany(() => Wish, (wish) => wish.id)

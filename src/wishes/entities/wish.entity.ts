@@ -2,6 +2,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsPositive,
+  IsString,
   IsUrl,
   Length,
   Min,
@@ -20,13 +21,17 @@ import {
 
 @Entity()
 export class Wish {
+
   @PrimaryGeneratedColumn()
+  @IsNotEmpty()
   id: number;
 
   @CreateDateColumn()
+  @IsNotEmpty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsNotEmpty()
   updatedAt: Date;
 
   @Column()
@@ -35,10 +40,13 @@ export class Wish {
   name: string;
 
   @Column()
+  @IsUrl()
+  @IsNotEmpty()
   link: string;
 
   @Column()
   @IsUrl()
+  @IsNotEmpty()
   image: string;
 
   @Column()
@@ -54,11 +62,13 @@ export class Wish {
   raised: number;
 
   @Column()
+  @IsString()
   @Length(1, 1024)
   description: string;
 
   @Column()
   @IsPositive()
+  @IsNumber()
   copied: number;
 
   @ManyToOne(() => User, (user) => user.id)

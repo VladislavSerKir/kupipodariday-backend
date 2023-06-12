@@ -14,12 +14,15 @@ import {
 @Entity()
 export class Offer {
   @PrimaryGeneratedColumn()
+  @IsNotEmpty()
   id: number;
 
   @CreateDateColumn()
+  @IsNotEmpty()
   createdAt: Date;
 
   @UpdateDateColumn()
+  @IsNotEmpty()
   updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.offers)

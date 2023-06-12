@@ -14,7 +14,8 @@ export class OffersService {
 
   async createOffer(body, user: User) {
     const { itemId, amount } = body;
-    const sponsoredWish = await this.wishesService.getWishById(itemId)
+    const sponsoredWish = await this.wishesService.getWishById(itemId);
+
     if (!sponsoredWish) {
       throw new NotFoundException('Подарок на который скидываются не найден');
     } else if (sponsoredWish.owner.id === user.id) {
@@ -45,7 +46,8 @@ export class OffersService {
         user: true,
         item: true
       }
-    })
+    });
+
     if (!offers) {
       throw new NotFoundException('Предложения скинуться не найдено');
     } else {
@@ -61,9 +63,11 @@ export class OffersService {
         item: true
       }
     });
+
     if (!offer) {
       throw new NotFoundException('Предложение скинуться не найдено');
+    } else {
+      return offer;
     }
-    return offer;
   }
 }

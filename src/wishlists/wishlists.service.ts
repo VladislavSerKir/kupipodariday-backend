@@ -17,7 +17,8 @@ export class WishlistsService {
       relations: {
         owner: true,
       }
-    })
+    });
+
     if (!wishlists) {
       throw new NotFoundException(`Вишлисты не найдены`);
     } else {
