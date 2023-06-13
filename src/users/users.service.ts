@@ -98,7 +98,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`Пользователя ${username} не существует`);
     } else {
-      console.log(user.wishes)
       return user.wishes;
     }
   }

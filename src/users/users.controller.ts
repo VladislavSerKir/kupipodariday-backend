@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/co
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserDto } from './dto/find-user.dto';
-import { JwtGuard } from 'src/auth/JwtGuard';
+import { JwtGuard } from 'src/auth/jwtGuard';
 import { User } from './entities/user.entity';
 import { AuthUser } from 'src/decorators/user.decorator';
 import { Wish } from 'src/wishes/entities/wish.entity';

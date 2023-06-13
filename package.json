@@ -1,7 +1,7 @@
 {
   "name": "kupipodariday-backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "Backend app based on NestJS",
   "author": "Vladislav Kireev",
   "private": true,
   "license": "UNLICENSED",
